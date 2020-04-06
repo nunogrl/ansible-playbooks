@@ -1,0 +1,21 @@
+all:
+  hosts:
+    test01:
+  children:
+    dev:
+      hosts:
+        test01:
+        palladio:
+    webservers:
+      hosts:
+        test01:
+    dbservers:
+      hosts:
+        palladio:
+    dns:
+      hosts:
+        palladio:
+        test01:
+    git: 
+      hosts:
+        palladio:
