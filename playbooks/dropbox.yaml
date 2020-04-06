@@ -1,6 +1,5 @@
 ---
 - hosts: git-dev
-  # user: nuno
   become: yes
   roles:
     - role: BCdropbox
