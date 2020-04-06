@@ -1,0 +1,32 @@
+---
+
+- name: create dir
+  file:
+    path: /srv/www
+    state: directory
+
+- name: Get gitlist
+  unarchive:
+    src: https://github.com/klaussilveira/gitlist/releases/download/1.0.2/gitlist-1.0.2.tar.gz
+    dest: /srv/www
+    remote_src: yes
+
+- name: Copy file with owner and permissions
+  copy:
+    src: config.ini
+    dest: /srv/www/gitlist/config.ini
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: create dir
+  file:
+    path: /srv/www/gitlist/cache
+    state: directory
+    mode: '0777'
+
+- name: add www-data to git group 
+  action: command usermod -a -G git www-data
+  notify:
+    - restart php
+

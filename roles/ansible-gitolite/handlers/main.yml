@@ -1,0 +1,16 @@
+---
+# update gitolte configuration/setup
+- name: gitolite setup
+  tags: gitolite
+  command: "{{ gitolite_install_dir }}/gitolite setup"
+  become: yes
+  become_user: "{{ gitolite_user_name }}"
+  args:
+    chdir: "{{ gitolite_user_home }}"
+
+# httpd server
+- name: service restart httpd
+  tags: gitolite_httpd
+  service:
+    state: restarted
+    name: "{{ gitolite_httpd_service }}"

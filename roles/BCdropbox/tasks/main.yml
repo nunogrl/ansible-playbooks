@@ -1,0 +1,31 @@
+---
+- name: Install Dropbox-Uploader requirements
+  apt: name={{ item }} state=present
+  with_items:
+    - curl
+    - git
+  
+- name: Ensure /opt/bctools/Dropbox-Uploader directory has correct permissions.
+  file:
+    path: /opt/bctools/Dropbox-Uploader
+    state: directory
+    owner: root
+    group: root
+
+- name: Clone Dropbox-Uploader
+  git:
+    # repo: git@github.com:andreafabrizi/Dropbox-Uploader.git
+    repo: https://github.com/andreafabrizi/Dropbox-Uploader.git
+    version: master
+    dest: /opt/bctools/Dropbox-Uploader
+    accept_hostkey: yes
+  become: yes
+
+- name: Get credentials Dropbox-Uploader
+  set_fact: dropbox1token="{{ lookup('passwordstore', 'external/dropbox1/token')}}"
+
+- name: Configure Dropbox-Uploader
+  when: ( dropbox1token is defined )
+  template:
+    src: templates/.dropbox_uploader.j2
+    dest: /root/.dropbox_uploader
