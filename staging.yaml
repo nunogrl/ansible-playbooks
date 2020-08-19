@@ -2,20 +2,12 @@ all:
   hosts:
     test01:
   children:
+    builder:
+      hosts:
+        test01:
+    bcdocs:
+      hosts:
+        palladio:
     dev:
-      hosts:
-        test01:
-        palladio:
-    webservers:
-      hosts:
-        test01:
-    dbservers:
-      hosts:
-        palladio:
-    dns:
-      hosts:
-        palladio:
-        test01:
-    git: 
       hosts:
         palladio:
