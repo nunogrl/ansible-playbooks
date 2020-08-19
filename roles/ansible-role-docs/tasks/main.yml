@@ -1,0 +1,49 @@
+---
+# tasks file for ansible-role-docs
+- name: create temporary build directory
+  tempfile:
+    state: directory
+    suffix: build
+  register: repo_folder
+
+- name: create temporary virtualenv directory
+  tempfile:
+    state: directory
+    suffix: virtualenv
+  register: envdir
+
+- name: Get source
+  git:
+     repo: https://github.com/barbearclassico/docs.git
+     dest: "{{ repo_folder.path }}"
+     update: yes
+     version: master
+  when: repo_folder.path is defined
+
+- name: Installing PIP requirements
+  pip:
+    requirements: "{{ repo_folder.path }}/requirements.txt"
+    virtualenv: "{{ envdir.path }}"
+    virtualenv_python: python3
+  register: pipinstall
+
+- name: pip install output
+  debug:
+    msg: "{{ pipinstall.stdout_lines }}"
+
+- name: Build project
+  make:
+    chdir: "{{ repo_folder.path }}"
+    target: html
+
+- name: Get build folder
+  copy:
+    content: '{{ repo_folder|to_json }}'
+    dest: repofolder.json
+  delegate_to: localhost
+
+- name: delete temp envdir
+  file:
+    path: "{{ envdir.path }}"
+    state: absent
+  when: envdir.path is defined

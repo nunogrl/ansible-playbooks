@@ -1,0 +1,67 @@
+---
+- name: "build docs"
+  hosts: localhost
+  connection: local 
+  roles:
+  - ansible-role-docs
+- name: "push docs to server"
+  hosts: bcdocs
+  # gather_facts: false
+  become: yes
+  vars:
+    docs_domain: "docs.barbearclassico.com"
+    ansible_os_family: "Debian"
+    ansible_distribution: "Debian"
+    deploy_user: "{{ ansible_user | default('ansible') }}"
+    docs_address: "{{ docs_domain | default('gitserver.dah') }}"
+    sitepath: "/srv/www/docsbc"
+    remotefolder: "barbearclassico/"
+    nginx_remove_default_vhost: true
+    nginx_vhosts:
+      - listen: "80"
+        server_name: "{{ docs_address }}"
+        root: "{{ sitepath }}"
+        index: "index.html"
+        state: "present"
+        template: "{{ nginx_vhost_template }}"
+        filename: "docsbc.conf"
+        extra_parameters: |
+          if ($host = docs.barbearclassico.com) {
+              return 301 https://$host$request_uri;
+          } # managed by Certbot
+          return 404; # managed by Certbot
+      - listen: "443 ssl"
+        extra_parameters: |
+          ssl_certificate /etc/letsencrypt/live/docs.barbearclassico.com/fullchain.pem; # managed by Certbot
+          ssl_certificate_key /etc/letsencrypt/live/docs.barbearclassico.com/privkey.pem; # managed by Certbot
+          include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+          ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+  pre_tasks:
+   - name: "import vars"
+     include_vars:
+       file: repofolder.json
+       name: repofolder
+   - name: "repofolder var" 
+     debug:
+       msg: "{{ repofolder }}"
+   - name: "copy site"
+     synchronize:
+       src: "{{ repofolder.path }}/_build/html/"
+       dest: "{{ sitepath}}"
+       #roles:
+       #  - ansible-role-nginx
+- name: "Clean up"
+  hosts: localhost
+  connection: local 
+  tasks:
+   - name: "import vars"
+     include_vars:
+       file: repofolder.json
+       name: repofolder
+   - name: delete temp builddir
+     file:
+       path: "{{ repo_folder.path }}"
+       state: absent
+     when: repo_folder.path is defined
+
+
