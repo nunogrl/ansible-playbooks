@@ -1,3 +1,6 @@
 [submodule "roles/ansible-role-mysql"]
 	path = roles/ansible-role-mysql
 	url = git@github.com:geerlingguy/ansible-role-mysql.git
+[submodule "roles/ansible-role-nodejs"]
+	path = roles/ansible-role-nodejs
+	url = git@github.com:geerlingguy/ansible-role-nodejs.git
