@@ -4,7 +4,7 @@
   with_items:
     - curl
     - git
-  
+
 - name: Ensure /opt/bctools/Dropbox-Uploader directory has correct permissions.
   file:
     path: /opt/bctools/Dropbox-Uploader
@@ -22,7 +22,7 @@
   become: yes
 
 - name: Get credentials Dropbox-Uploader
-  set_fact: dropbox1token="{{ lookup('passwordstore', 'external/dropbox1/token')}}"
+  set_fact: dropbox1token="{{ lookup('passwordstore', 'external/dropbox1/token') }}"
 
 - name: Configure Dropbox-Uploader
   when: ( dropbox1token is defined )
