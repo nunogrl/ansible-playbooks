@@ -1,0 +1,85 @@
+---
+# tasks file for ansible-passwordstore
+- name: update apt cache
+  apt: update_cache=yes
+  tags:
+    - installpackages
+
+- name: install required packages
+  apt:
+    pkg:
+    - git
+    - gpg
+    - pass
+    - rng-tools
+  tags:
+    - installpackages
+
+- name: get keys
+  git:
+    repo: "https://{{ githubuser | urlencode }}:{{ token | urlencode }}@github.com/barbearclassico/martimmoniz.git"
+    version: master
+    dest: /opt/keymaster/martimmoniz
+    accept_hostkey: yes
+  become: yes
+  tags:
+    - pass-workspace
+
+
+      #- name: Tests password store
+      #  include_tasks: passwordstore-tests.yaml
+      #  tags:
+      #    - pass-tests
+
+- name: Get deployer key
+  set_fact: 
+    gpgpriv: |
+      {{ lookup('passwordstore', 'bc-new/test01/gpg-priv returnall=true') }}
+    
+- name: push priv key
+  when: ( gpgpriv is defined )
+  template:
+    src: templates/serverkey.j2
+    dest: /tmp/serverkey.asc
+    owner: "{{ deploy_user }}"
+    mode: '0644'
+      # - name: deploy key
+      #   template:
+      #     src: serverkey.j2
+      #     dest: /opt/keymaster/private.key
+- name: import defined key
+  become: yes
+  become_user: "{{ deploy_user }}"
+  when: ( gpgpriv is defined )
+  # This should be achieved with something like this, but it's not working now 
+  # command: "cat {{ lookup('passwordstore', 'bc-new/test01/gpg-priv') }} | gpg --allow-secret-key-import --import" 
+  command: "gpg --allow-secret-key-import --import /tmp/serverkey.asc" 
+
+  # 
+  # - name: create keys workspace
+  #   file:
+  #     path: "{{ item }}"
+  #     state: directory
+  #     owner: "{{ deploy_user }}"
+  #   with_items:
+  #     - '/opt/keymaster'
+  #     - '/opt/keymaster/vault'
+  #     - '/opt/keymaster/gpgkeys'
+  #   tags:
+  #     - pass-workspace
+  # 
+  # - name: Generate a config file for the server
+  #   template:
+  #     src: config.j2
+  #     dest: /opt/keymaster/config.ini
+  #     owner: "{{ deploy_user }}"
+  #     mode: '0644'
+  #   tags:
+  #     - pass-workspace
+  # 
+  # - name: push keys generation
+  #   copy:
+  #     src: initgpg.sh
+  #     dest: /opt/keymaster/initgpg.sh
+  #     owner: "{{ deploy_user }}"
+  #     group: "{{ deploy_user }}"
