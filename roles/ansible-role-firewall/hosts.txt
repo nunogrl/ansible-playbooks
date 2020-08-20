@@ -1,0 +1,5 @@
+[oxygene]
+oxygene.barbearclassico.com
+
+[palladio]
+palladio.barbearclassico.com
