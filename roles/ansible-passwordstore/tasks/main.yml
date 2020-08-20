@@ -32,10 +32,10 @@
       #    - pass-tests
 
 - name: Get deployer key
-  set_fact: 
+  set_fact:
     gpgpriv: |
       {{ lookup('passwordstore', 'bc-new/test01/gpg-priv returnall=true') }}
-    
+
 - name: push priv key
   when: ( gpgpriv is defined )
   template:
@@ -53,7 +53,7 @@
   when: ( gpgpriv is defined )
   # This should be achieved with something like this, but it's not working now 
   # command: "cat {{ lookup('passwordstore', 'bc-new/test01/gpg-priv') }} | gpg --allow-secret-key-import --import" 
-  command: "gpg --allow-secret-key-import --import /tmp/serverkey.asc" 
+  command: "gpg --allow-secret-key-import --import /tmp/serverkey.asc"
 
   # 
   # - name: create keys workspace

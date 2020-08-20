@@ -25,7 +25,7 @@
     state: directory
     mode: '0777'
 
-- name: add www-data to git group 
+- name: add www-data to git group
   action: command usermod -a -G git www-data
   notify:
     - restart php
