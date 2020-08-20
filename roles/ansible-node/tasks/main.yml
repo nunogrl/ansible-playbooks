@@ -1,0 +1,29 @@
+---
+# tasks file for ansible-php
+- name: install packages
+  apt:
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg2
+    - software-properties-common
+
+- name: import apt docker key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: install docker deb repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian buster stable
+    state: present
+
+- name: install docker packages
+  apt:
+    update_cache: yes
+    pkg:
+    - docker-ce
+    - docker-compose
+  notify:
+    - restart docker
