@@ -1,0 +1,65 @@
+---
+
+hostname: palladio
+ansible_ssh_host: 217.182.252.137
+password: "$inter"
+allow: "@inf"
+cost: "5"
+currency: "eur"
+vendor: ovh
+owner: "nuno"
+region: "Gravelines GRA1"
+country: "France"
+zone: "os-gra1-005"
+cluster: "cluster-001"
+type: "dev"
+overage: "-1"
+bandwidth: "100TB"
+bandwidth_billing: "1"
+interface: eth0
+speed: 1000
+sshpk: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsZvbXsRdXCXy9DpUuK1pvFXLjOc5FmeWJE/7Oj4uQ83Suq1n+4H5bzArdglGHXvVrYv/8nMgRC67sEAC+6IJRurP1FluhcQqIJ0n5NyKVHXsi8h61rXWMraGiDmK+1dU179Hro7zeVRmuTbxhomx66umNPSGsDf77NquWuBsfwWQdwtUkFY4IeTQwGeMuKjamXScZDZIjFsXokjhFk9U1PzWKSqNbqMZnGZ8RKbjeDoKRUy9l8OG4p7LnIDZhlILuzvNIy0duUU2tRnrYjjCe8I9PLcLdczFd4vhZ2RgfQI0icB9ygzEloh4X+vE2mRKFMc9CuOairS975380eDPn"
+fingerprint: 56c3701e1985feb2ddead878f83ae4b9
+gitlist_domain: "git-dev.pulsingminds.com"
+gitolite_import_backup: yes
+bc_domain: "dev.barbearclassico.com"
+ci_address: "ci.pulsingminds.com"
+## Firewall
+firewall_v4_group_rules:
+  400 allow http:
+    - -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    - -A OUTPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+  400 allow https:
+    - -A INPUT -p tcp --dport https -j ACCEPT
+  400 allow MySQL:
+    - -A INPUT -p tcp -s 176.31.187.157/32 --dport 3306 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    - -A INPUT -p tcp -s 217.182.65.176/32 --dport 3306 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+      # - -A INPUT -p tcp -s 2.83.25.14/24     --dport 3306 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    - -A INPUT -p tcp -s 10.8.0.0/24       --dport 3306 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    - -A OUTPUT -p tcp --sport 3306 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+  400 allow mailgun:
+    - -A OUTPUT -p tcp --sport 587 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+  400 allow 7890:
+    - -A INPUT -p tcp --dport 7890 -j ACCEPT
+  400 allow 2201:
+    - -A INPUT -p tcp --dport 2201 -j ACCEPT
+  400 allow vpninput:
+    # - -t nat -A PREROUTING -p tcp --dport 3306 -j DNAT --to 10.8.0.1
+    - -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to {{ ansible_ssh_host }}
+    - -I INPUT -p udp --dport 1194 -j ACCEPT
+    - -I FORWARD -s 10.8.0.0/24 -j ACCEPT
+    - -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+    # - -t filter -A FORWARD -p tcp -d 10.8.0.1 --dport 3306 -j ACCEPT 
+firewall_v4_host_rules:
+  400 allow 7890: []
+firewall_v6_group_rules:
+  400 allow http:
+    - -A INPUT -p tcp --dport http -j ACCEPT
+  400 allow 7890:
+    - -A INPUT -p tcp --dport 7890 -j ACCEPT
+firewall_v6_host_rules:
+  400 allow 7890: []
+
+
+
+

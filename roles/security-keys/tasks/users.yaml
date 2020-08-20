@@ -1,0 +1,101 @@
+    - name: get core users names
+      set_fact:
+        superusers: "{{ lookup('filetree', 'users/') | json_query(listquery) }}"
+      vars:
+        listquery: "[*].path"
+      tags:
+        - coreusers
+
+    - debug:
+        var: superusers
+      tags:
+        - coreusers
+
+    - name: Add other users
+      user:
+        name: "{{ item }}"
+        password: "{{ UBUNTU_COMMON_DEPLOY_PASSWORD | password_hash('sha512') }}"
+        shell: /bin/bash
+      with_items: "{{ superusers }}"
+      when: superusers is defined
+      tags:
+         - coreusers
+
+    - name: Add authorized keys for core users
+      authorized_key:
+        user: "{{ item }}"
+        key: "{{ lookup('file', 'users/{{ item }}') }}"
+      with_items: "{{ superusers }}"
+      when: superusers is defined
+      tags:
+         - coreusers
+
+    - name: Add core users to sudoers.d
+      template:
+        src: files/deploysudoers.j2
+        dest: /etc/sudoers.d/{{ item }}
+        owner: root
+        group: root
+        mode: 0400
+      with_items: "{{ superusers }}"
+      tags:
+         - coreusers
+      when: superusers is defined
+
+    - name: Find existing users
+      shell: |
+        set -o pipefail
+        cat /etc/passwd | awk -F: '{ if ($3>=1000 && $3<4000) print $1 }'
+      args:
+        executable: /bin/bash
+      register: existingusers
+      changed_when: "'deploy' not in existingusers.stdout"
+      # no_log: True
+      tags:
+         - coreusers
+
+    - name: Existing users
+      debug:
+        var: existingusers
+      tags:
+        - coreusers
+
+    - name: Users to keep
+      debug:
+        var: ubuntu_common_deploy_user_name | union(superusers)
+      tags:
+        - coreusers
+      when: superusers is defined
+
+    - name: identify users to delete
+      set_fact:
+        removeusers: "{{ existingusers.stdout_lines | difference(ubuntu_common_deploy_user_name | union(superusers)) }}"
+      no_log: True
+      tags:
+         - coreusers
+      when: superusers is defined
+
+    - name: delete all users
+      set_fact:
+        removeusers: "{{ existingusers.stdout_lines | difference(ubuntu_common_deploy_user_name) }}"
+      no_log: True
+      tags:
+         - coreusers
+      when: superusers is not defined
+
+    - name: Users to remove
+      debug:
+        var: removeusers
+      tags:
+         - coreusers
+
+    - name: Delete unused  users
+      user:
+        name: "{{ item }}"
+        state: absent
+        remove: yes
+      with_items: "{{ removeusers }}"
+      when: removeusers is defined
+      no_log: True
+
+

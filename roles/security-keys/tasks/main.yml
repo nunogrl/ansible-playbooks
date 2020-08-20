@@ -1,0 +1,176 @@
+---
+# tasks file for security-keys
+
+#    - name: Change root password
+#      user: name=root password={{ UBUNTU_COMMON_ROOT_PASSWORD | password_hash('sha512') }}
+#      # no_log: True
+#      tags:
+#         - rootaccess
+
+    - name: Change SSH attributes
+      include_tasks: ssh-setup.yaml
+      tags:
+        - ssh-setup
+
+    - name: Change host attributes
+      include_tasks: setup-host.yaml
+      tags:
+        - hostname
+
+    - name: added skel
+      copy:
+        src: files/bashrc.script
+        dest: /etc/skel/.bashrc
+        owner: root
+        group: root
+        mode: '644'
+      tags:
+         - login
+
+
+
+    - name: Setup default users
+      include_tasks: init-users.yaml
+
+    - name: Setup regular users
+      include_tasks: users.yaml
+      tags:
+        - coreusers
+
+
+
+      # - name: Check disk space
+      #   assert:
+      #     that:
+      #       mount.size_available > mount.size_total | float * 0.1
+      #   vars:
+      #     mount: "{{ ansible_mounts | selectattr('mount','equalto','/')|list|first }}"
+      #   register: disk_free
+      #   no_log: True
+      #   ignore_errors: True
+      #   tags: patching
+
+      #- name: Add super users
+      #  find:
+      #    paths: ~/users/
+      #    file_type: file
+      #  register: superusers
+
+      #    - debug: var={{item}}
+      #      with_items: "{{ sed_commands|.results.stdout }}"
+      #    - debug: var=sed_commands
+      #
+
+
+           #  - name: fileglob again
+           #    command: cat {{item}}
+           #    register: superusers
+           #    with_fileglob: users/*.key
+           #    delegate_to: localhost
+
+      #    - name: Display paths of all .txt files in dir
+      #      debug: msg={{ lookup('fileglob', 'users/*.key') }}
+      #      register: superusers
+      #
+      # - debug: var=superusers.results|item
+
+      #    - name: Find users
+      #      shell: find users/ -type f
+      #      register: existingusers
+      #      # no_log: True
+      # 
+
+
+      #   - name: Add authorized keys for super users
+      #     authorized_key: user={{ item }} key="{{ lookup('file', 'users/{{ item }}') }}"
+      #     with_items: "{{ superusers }}"
+
+      #   - name: Copy each file over that matches the given pattern
+      #     copy:
+      #       src: "{{ item }}"
+      #       dest: "/etc/fooapp/"
+      #       owner: "root"
+      #       mode: 0600
+      #     with_fileglob:
+      #        - "users/*.key"
+
+
+           #    - name: Add deploy user
+           #      user: name="{{ item }}" password="{{ UBUNTU_COMMON_DEPLOY_PASSWORD | password_hash('sha512') }}" shell=/bin/bash
+           #      with_items: "{{ ubuntu_common_deploy_user_name }}"
+           #      no_log: True
+           #
+           #    - name: Add authorized keys for deploy user
+           #      authorized_key: user={{ item }} key="{{ lookup('file', './id_rsa.pub') }}"
+           #      with_items: "{{ ubuntu_common_deploy_user_name }}"
+           #
+           #
+      # - name: Add deploy user to sudoers
+      #   lineinfile: dest=/etc/sudoers
+      #               regexp="{{ ubuntu_common_deploy_user_name }} ALL"
+      #               line="{{ ubuntu_common_deploy_user_name }} ALL=(ALL) ALL"
+      #               state=present
+
+           #
+           #    - name: Add deploy user to sudoers.d
+           #      template:
+           #        src: files/deploysudoers.j2
+           #        dest: /etc/sudoers.d/{{ item }}
+           #        owner: root
+           #        group: root
+           #        mode: 0400
+           #      with_items: "{{ ubuntu_common_deploy_user_name }}"
+           #      no_log: True
+           #
+           #    - name: Find users
+           #      # shell: "getent passwd | awk -F: '$3 > 1000 {print $1}'"
+           #      shell: "cat /etc/passwd | awk -F: '{ if ($3>1000 && $3<2000) print $1 }'"
+           #      register: existingusers
+           #      no_log: True
+           #    
+           #    - debug: var=existingusers.stdout_lines
+           #
+           #    - name: identify users to delete
+           #      set_fact:
+           #        removeusers: "{{ existingusers.stdout_lines | difference (ubuntu_common_deploy_user_name) }}"
+           #      register: usersfound
+           #      no_log: True
+           #
+           #    - debug: var=usersfound
+           #
+           #    - name: Delete unused  users
+           #      # shell: "getent passwd | awk -F: '$3 > 1000 {print $1}'"
+           #      user: name={{item}} state=absent remove=yes
+           #      with_items: "{{ removeusers }}"
+           #      when: usersfound.ansible_facts is defined
+           #      no_log: True
+           #
+           #    - name: Change ssh port
+           #      lineinfile: dest=/etc/ssh/sshd_config
+           #                  regexp="^Port\s"
+           #                  line="Port {{ ubuntu_common_ssh_port }}"
+           #                  state=present
+           #      notify: Restart ssh
+           #
+           #    - name: Allow password authentication
+           #      lineinfile: dest=/etc/ssh/sshd_config
+           #                  regexp="^PasswordAuthentication"
+           #                  line="PasswordAuthentication yes"
+           #                  state=present
+           #      notify: Restart ssh
+           #
+           #    - name: Allow root SSH access
+           #      lineinfile: dest=/etc/ssh/sshd_config
+           #                  regexp="^PermitRootLogin"
+           #                  line="PermitRootLogin yes"
+           #                  state=present
+           #      notify: Restart ssh
+           #
+           #    - name: added skel
+           #      copy:
+           #        src: files/bashrc.script
+           #        dest: /etc/skel/.bashrc
+           #        owner: root
+           #        group: root
+           #        mode: 644
+           #

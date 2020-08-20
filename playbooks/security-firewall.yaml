@@ -1,0 +1,16 @@
+---
+- hosts: dev
+  # user: nuno
+  become: yes
+  roles:
+      #     - security-keys
+      #  - BCdropbox
+    - ansible-role-firewall
+
+      #- hosts: dns
+      #  # user: nuno
+      #  become: yes
+      #  roles:
+      #    - ansible-role-firewall
+      #    - bcdropbox
+      #    - ansible-role-mysql

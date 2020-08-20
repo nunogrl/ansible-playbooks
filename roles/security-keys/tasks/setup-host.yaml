@@ -1,0 +1,51 @@
+---
+- name: show hostname
+  debug:
+    var: ansible_host
+  tags:
+    - hostname
+
+- name: show address
+  debug:
+    var: hostname
+  tags:
+    - hostname
+
+- name: update hostname
+  hostname:
+    name: "{{ hostname }}"
+  tags:
+    - hostname
+
+- name: update hosts
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.(\S)*\s(?!localhost)'
+    line: "127.0.1.1       {{ hostname }}.tests.com    {{ hostname }}"
+  tags:
+    - hostname
+
+- name: install rsync sudo cron
+  apt:
+    pkg:
+      - rsync
+      - sudo
+      - cron
+      - facter
+
+- name: is this physical or virtual
+  # command: "[ $(facter virtual | grep -q physical && echo 1) ]"
+  command: "facter virtual"
+  register: servertype
+  changed_when: "'kvm' in servertype.stdout"
+  ignore_errors: true
+
+- name: servertype
+  debug:
+    var: servertype
+
+- name: this is virtual
+  debug:
+    msg: "this is virtual: don't install NTP stuff"
+  when:
+    - servertype.stdout == "kvmdd"

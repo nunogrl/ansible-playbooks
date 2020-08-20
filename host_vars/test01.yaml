@@ -1,0 +1,44 @@
+---
+security: ovh/test01
+# ansible_user: root
+hostname: test01
+bookmarksaddress: bookmarks-dev.pulsingminds.com
+ansible_ssh_host: 54.38.186.254
+php_version: '7.1'
+## Firewall
+firewall_v4_group_rules:
+  400 allow http:
+    - -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    - -A OUTPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+  400 allow https:
+    - -A INPUT -p tcp --dport https -j ACCEPT
+  400 allow MySQL:
+    - -A INPUT -p tcp -s 176.31.187.157/32 --dport 3306 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    - -A INPUT -p tcp -s 217.182.65.176/32 --dport 3306 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    - -A OUTPUT -p tcp --sport 3306 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+  400 allow mailgun:
+    - -A OUTPUT -p tcp --sport 587 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+    - -A OUTPUT -p tcp --sport 589 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+  400 allow 7890:
+    - -A INPUT -p tcp --dport 7890 -j ACCEPT
+  400 allow 2201:
+    - -A INPUT -p tcp --dport 2201 -j ACCEPT
+  400 allow vpninput:
+    - -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to {{ ansible_ssh_host }}
+    - -I INPUT -p udp --dport 1194 -j ACCEPT
+    - -I FORWARD -s 10.8.0.0/24 -j ACCEPT
+    - -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+     
+firewall_v4_host_rules:
+  400 allow 7890: []
+firewall_v6_group_rules:
+  400 allow http:
+    - -A INPUT -p tcp --dport http -j ACCEPT
+  400 allow 7890:
+    - -A INPUT -p tcp --dport 7890 -j ACCEPT
+firewall_v6_host_rules:
+  400 allow 7890: []
+
+
+
+
