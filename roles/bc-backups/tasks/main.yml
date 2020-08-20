@@ -1,0 +1,24 @@
+---
+# tasks file for bc-backups
+- name: install pigz
+  apt:
+    pkg:
+      - pigz
+    state: present
+
+- name: create backup folder
+  file:
+    path: /opt/backup
+    state: directory
+
+- name: deploy backup scripts
+  template:
+    src: backupdb.j2
+    dest: /opt/backup/backupbarbearclassico.sh
+
+- name: create backup folder
+  file:
+    path: /opt/backup/backupbarbearclassico.sh
+    mode: '0755'
+
+

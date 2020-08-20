@@ -1,0 +1,60 @@
+#!/bin/bash
+
+
+
+DBSERVER="{{ db_server }}"
+DATABASE="{{ db_name }}"
+USER="{{ db_bc_user }}"
+PASS="{{ db_bc_pass}}"
+
+FILE=bc_${DBSERVER}-$(date +"%F_%H-%M").sql.gz
+
+BACKUP=/opt/backup/
+
+TODAY=$(date +%F)
+
+mysqldump --opt --user=${USER} --host="${DBSERVER}" --password=${PASS} ${DATABASE} | /usr/bin/pigz  >  ${BACKUP}${FILE} 
+# wait 
+(cd ${BACKUP} && /opt/bctools/Dropbox-Uploader/dropbox_uploader.sh -q upload ${FILE} barbearclassico )
+
+echo "(cd ${BACKUP} && . ../bctools/Dropbox-Uploader/dropbox_uploader.sh -q upload ${FILE} barbearclassico )"
+
+echo "/opt/bctools/Dropbox-Uploader/dropbox_uploader.sh list  barbearclassico   | /bin/grep -q  ${FILE} && rm  ${BACKUP}${FILE}"
+
+exit 0 
+
+
+/opt/bctools/Dropbox-Uploader/dropbox_uploader.sh list barbearclassico  | grep sql.gz | while read line ; do 
+	echo $line ; 
+	filename=`echo $line | awk '{ print $3 }'` ; 
+	printf "$filename "; 
+	filedate=`echo $line | awk -F"_" '{ print $2 }'` ; 
+	printf "$filedate "  ; 
+	dow=$(date -d $filedate +%u) ; 
+	echo $dow ; 
+done
+
+
+
+# Prunning logic
+# keep 1 backup per day for the last week
+# keep 1 backup per week for the last month
+# keep 1 backup per month for everything else.
+# ============================================
+# Goal:  
+# 1 year = 
+# 	11 backups (1 per month) 
+# 	4  mondays current month
+# 	7  days current week
+# ---------------------------
+# TOTAL 22 backups / year
+
+ if  FileOlderThanOneMonth  -a  NotFirstMonday 
+ 	DeleteRemotefile
+ else 
+ 	if FileOlderThanOneWeek -a  NotMonday
+ 		DeleteRemotefile
+ 	fi
+ fi
+
+
