@@ -30,8 +30,6 @@
               fastcgi_index index.php;
               fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
               include fastcgi_params;
-              allow  10.8.0.2/24;
-              deny   all;
           }
       
           #   auth_basic "Restricted";
@@ -54,8 +52,6 @@
           }
           location / {
               try_files $uri @gitlist;
-              allow  10.8.0.2/24;
-              deny   all;
           }
           location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
           add_header Vary "Accept-Encoding";
@@ -63,8 +59,6 @@
               try_files $uri @gitlist;
               tcp_nodelay off;
               tcp_nopush on;
-              allow  10.8.0.2/24;
-              deny   all;
           }
           #   location ~* \.(git|svn|patch|htaccess|log|route|plist|inc|json|pl|po|sh|ini|sample|kdev4)$ {
           #       deny all;
@@ -72,8 +66,6 @@
       
           location @gitlist {
               rewrite ^/.*$ /index.php;
-              allow  10.8.0.2/24;
-              deny   all;
           }
     gitolite_install_dir: /usr/local/bin
     gitolite_repositories:
