@@ -1,0 +1,39 @@
+---
+# tasks file for ansible-role-barbearclassico
+- name: get packages
+  apt:
+    pkg:
+      - unzip
+      - tar
+
+- name: create dir
+  file:
+    path: /srv/www/barbearclassico
+    state: directory
+
+- name: Get smf engine
+  unarchive:
+    src: smf_2-0-15_install.zip
+    # https://download.simplemachines.org/index.php?thanks;filename=smf_2-0-17_install.zip
+    # https://download.simplemachines.org/index.php?thanks;filename=smf_2-0-17_install.tar.gz
+    dest: /srv/www/barbearclassico
+    # remote_src: yes
+
+- name: fix permissions
+  # chmod 777 attachments/ avatars/ cache/ Packages/ Smileys/ Sources/ Themes/ Packages/installed.list agreement.txt Settings.php Settings_bak.php 
+  file:
+    path: '{{ item }}'
+    state: directory
+    recurse: yes
+    mode: '0755'
+  with_items:
+    - "/var/www/barbearclassico/attachments"
+    - "/var/www/barbearclassico/avatars"
+    - "/var/www/barbearclassico/cache"
+    - "/var/www/barbearclassico/Packages"
+    - "/var/www/barbearclassico/Packages/installed.list"
+    - "/var/www/barbearclassico/Smileys"
+    - "/var/www/barbearclassico/Themes"
+    - "/var/www/barbearclassico/agreement.txt"
+    - "/var/www/barbearclassico/Settings.php"
+    - "/var/www/barbearclassico/Settings_bak.php"
