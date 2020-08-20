@@ -1,0 +1,21 @@
+---
+# tasks file for bcTheme-UX-idesign
+- name: create dir
+  file:
+    path: /srv/BCThemes
+    state: directory
+    # owner: "{{ deploy_user }}"
+    # group: "{{ deploy_user }}"
+    # mode: '0755'
+
+- name: Apply theme
+  #become: yes
+  #become_user: "{{ deploy_user }}"
+  git:
+    force: yes
+    repo: https://github.com/barbearclassico/UX-idesignSMF.git
+    version: master
+    remote: github
+    dest: /srv/BCThemes/UX-idesignSMF
+    accept_hostkey: yes
+  debugger: on_failed
