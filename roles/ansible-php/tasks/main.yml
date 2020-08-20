@@ -7,6 +7,7 @@
     - lsb-release
     - ca-certificates
     - curl
+    update_cache: yes
 
 - name: import apt php key
   apt_key:
@@ -19,43 +20,43 @@
     state: present
 
 - name: install php packages
-  apt: 
+  apt:
     update_cache: yes
     pkg:
-    - php7.1
-    - php7.1-bcmath
-    - php7.1-bz2
-    - php7.1-cgi
-    - php7.1-cli
-    - php7.1-common
-    - php7.1-curl
-    - php7.1-dba
-    - php7.1-dev
-    - php7.1-enchant
-    - php7.1-fpm
-    - php7.1-gd
-    - php7.1-gmp
-    - php7.1-imap
-    - php7.1-interbase
-    - php7.1-intl
-    - php7.1-json
-    - php7.1-ldap
-    - php7.1-mbstring
-    - php7.1-mcrypt
-    - php7.1-mysql
-    - php7.1-odbc
-    - php7.1-opcache
-    - php7.1-pgsql
-    - php7.1-phpdbg
-    - php7.1-pspell
-    - php7.1-readline
-    - php7.1-recode
-    - php7.1-snmp
-    - php7.1-soap
-    - php7.1-sqlite3
-    - php7.1-sybase
-    - php7.1-tidy
-    - php7.1-xml
-    - php7.1-xmlrpc
-    - php7.1-xsl
-    - php7.1-zip
+    - "php{{ php_version }}"
+    - "php{{ php_version }}-bcmath"
+    - "php{{ php_version }}-bz2"
+    - "php{{ php_version }}-cgi"
+    - "php{{ php_version }}-cli"
+    - "php{{ php_version }}-common"
+    - "php{{ php_version }}-curl"
+    - "php{{ php_version }}-dba"
+    - "php{{ php_version }}-dev"
+    - "php{{ php_version }}-enchant"
+    - "php{{ php_version }}-fpm"
+    - "php{{ php_version }}-gd"
+    - "php{{ php_version }}-gmp"
+    - "php{{ php_version }}-imap"
+    - "php{{ php_version }}-interbase"
+    - "php{{ php_version }}-intl"
+    - "php{{ php_version }}-json"
+    - "php{{ php_version }}-ldap"
+    - "php{{ php_version }}-mbstring"
+      #- "php{{ php_version }}-mcrypt"
+    - "php{{ php_version }}-mysql"
+    - "php{{ php_version }}-odbc"
+    - "php{{ php_version }}-opcache"
+    - "php{{ php_version }}-pgsql"
+    - "php{{ php_version }}-phpdbg"
+    - "php{{ php_version }}-pspell"
+    - "php{{ php_version }}-readline"
+    - "php{{ php_version }}-recode"
+    - "php{{ php_version }}-snmp"
+    - "php{{ php_version }}-soap"
+    - "php{{ php_version }}-sqlite3"
+    - "php{{ php_version }}-sybase"
+    - "php{{ php_version }}-tidy"
+    - "php{{ php_version }}-xml"
+    - "php{{ php_version }}-xmlrpc"
+    - "php{{ php_version }}-xsl"
+    - "php{{ php_version }}-zip"
