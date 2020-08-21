@@ -15,7 +15,7 @@
   tags:
     - installpackages
 
-- name: get keys
+- name: Get passwords
   git:
     repo: "https://{{ githubuser | urlencode }}:{{ token | urlencode }}@github.com/barbearclassico/martimmoniz.git"
     version: master
@@ -25,37 +25,116 @@
   tags:
     - pass-workspace
 
-
-      #- name: Tests password store
-      #  include_tasks: passwordstore-tests.yaml
-      #  tags:
-      #    - pass-tests
-
-- name: Get deployer key
-  set_fact:
-    gpgpriv: |
-      {{ lookup('passwordstore', 'bc-new/test01/gpg-priv returnall=true') }}
-
-- name: push priv key
-  when: ( gpgpriv is defined )
-  template:
-    src: templates/serverkey.j2
-    dest: /tmp/serverkey.asc
-    owner: "{{ deploy_user }}"
-    mode: '0644'
-      # - name: deploy key
-      #   template:
-      #     src: serverkey.j2
-      #     dest: /opt/keymaster/private.key
-- name: import defined key
+- name: Test if the key exists
   become: yes
   become_user: "{{ deploy_user }}"
-  when: ( gpgpriv is defined )
+  raw: "gpg --list-secret-keys deployer@pulsingminds.com"
+  register: gpgkeypresent
+  tags:
+  - import-key
+
+- name: shows the key if it is present
+  debug:
+    msg: "{{ gpgkeypresent.stdout }}"
+  tags:
+  - import-key
+
+
+- name: Get deployer home path
+  when: gpgkeypresent is failed
+  shell: "getent passwd {{ deploy_user }} | cut -d: -f6"
+  register: deploy_home
+  tags:
+  - link
+
+- name: Create a symbolic link to password-store
+  when: gpgkeypresent is failed
+  # become: yes
+  # become_user: "{{ deploy_user }}"
+  # become_method: sudo
+  file:
+    src: "/opt/keymaster/martimmoniz"
+    dest: "{{ deploy_home.stdout }}/.password-store"
+    owner: "{{ deploy_user }}"
+    state: link
+  tags:
+  - link
+
+    #- name: Get deployer key
+    #  become: yes
+    #  become_user: "{{ deploy_user }}"
+    #  set_fact:
+    #    gpgpriv: |
+    #      {{ lookup('passwordstore', 'bc-new/test01/gpg-priv returnall=true') }}
+    #  tags:
+    #  - import-key
+    #
+    #- name: push priv key
+    #  when: ( gpgpriv is defined )
+    #  template:
+    #    src: templates/serverkey.j2
+    #    dest: /tmp/serverkey.asc
+    #    owner: "{{ deploy_user }}"
+    #    mode: '0644'
+
+- name: Makes gnupg folder readable
+  when: gpgkeypresent is failed
+  # when: ( gpgpriv is defined )
+  file:
+    path: "{{ deploy_home.stdout }}/.gnupg"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: '0666'
+    recurse: yes
+    state: directory
+  tags:
+  - import-key
+
+
+- name: import defined key
+  when: gpgkeypresent is failed
+  # become: yes
+  # become_user: "{{ deploy_user }}"
+  # become_method: sudo
+  # become_flags: '-s /bin/sh'
+  # when: ( gpgpriv is defined )
   # This should be achieved with something like this, but it's not working now 
   # command: "cat {{ lookup('passwordstore', 'bc-new/test01/gpg-priv') }} | gpg --allow-secret-key-import --import" 
-  command: "gpg --allow-secret-key-import --import /tmp/serverkey.asc"
+  shell:
+    cmd: |
+      export GNUPGHOME="{{ deploy_home.stdout }}/.gnupg"
+      (
+      cat <<EOF
+      {{ lookup('passwordstore', 'bc-new/test01/gpg-priv returnall=true') }}
+      EOF
+      ) | gpg --allow-secret-key-import --import
+  register: gpgimport
+  no_log: true
 
-  # 
+  # command: "gpg --allow-secret-key-import --import /tmp/serverkey.asc"
+  tags:
+  - import-key
+
+- name: Print gpg import output
+  when: gpgkeypresent is failed
+  debug:
+    msg: "{{ gpgimport.stdout }}\n{{ gpgimport.stderr }}"
+  tags:
+  - import-key
+
+
+- name: Protects gnupg from everyone
+  when: gpgkeypresent is failed
+  # when: ( gpgpriv is defined )
+  file:
+    path: "{{ deploy_home.stdout }}/.gnupg"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    recurse: yes
+    mode: '0700'
+    state: directory
+  tags:
+  - import-key
   # - name: create keys workspace
   #   file:
   #     path: "{{ item }}"
