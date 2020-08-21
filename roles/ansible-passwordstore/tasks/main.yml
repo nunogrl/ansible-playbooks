@@ -39,7 +39,6 @@
   tags:
   - import-key
 
-
 - name: Get deployer home path
   when: gpgkeypresent is failed
   shell: "getent passwd {{ deploy_user }} | cut -d: -f6"
@@ -49,9 +48,6 @@
 
 - name: Create a symbolic link to password-store
   when: gpgkeypresent is failed
-  # become: yes
-  # become_user: "{{ deploy_user }}"
-  # become_method: sudo
   file:
     src: "/opt/keymaster/martimmoniz"
     dest: "{{ deploy_home.stdout }}/.password-store"
@@ -59,23 +55,6 @@
     state: link
   tags:
   - link
-
-    #- name: Get deployer key
-    #  become: yes
-    #  become_user: "{{ deploy_user }}"
-    #  set_fact:
-    #    gpgpriv: |
-    #      {{ lookup('passwordstore', 'bc-new/test01/gpg-priv returnall=true') }}
-    #  tags:
-    #  - import-key
-    #
-    #- name: push priv key
-    #  when: ( gpgpriv is defined )
-    #  template:
-    #    src: templates/serverkey.j2
-    #    dest: /tmp/serverkey.asc
-    #    owner: "{{ deploy_user }}"
-    #    mode: '0644'
 
 - name: Makes gnupg folder readable
   when: gpgkeypresent is failed
@@ -90,16 +69,8 @@
   tags:
   - import-key
 
-
 - name: import defined key
   when: gpgkeypresent is failed
-  # become: yes
-  # become_user: "{{ deploy_user }}"
-  # become_method: sudo
-  # become_flags: '-s /bin/sh'
-  # when: ( gpgpriv is defined )
-  # This should be achieved with something like this, but it's not working now 
-  # command: "cat {{ lookup('passwordstore', 'bc-new/test01/gpg-priv') }} | gpg --allow-secret-key-import --import" 
   shell:
     cmd: |
       export GNUPGHOME="{{ deploy_home.stdout }}/.gnupg"
@@ -110,8 +81,6 @@
       ) | gpg --allow-secret-key-import --import
   register: gpgimport
   no_log: true
-
-  # command: "gpg --allow-secret-key-import --import /tmp/serverkey.asc"
   tags:
   - import-key
 
@@ -121,7 +90,6 @@
     msg: "{{ gpgimport.stdout }}\n{{ gpgimport.stderr }}"
   tags:
   - import-key
-
 
 - name: Protects gnupg from everyone
   when: gpgkeypresent is failed
@@ -135,30 +103,4 @@
     state: directory
   tags:
   - import-key
-  # - name: create keys workspace
-  #   file:
-  #     path: "{{ item }}"
-  #     state: directory
-  #     owner: "{{ deploy_user }}"
-  #   with_items:
-  #     - '/opt/keymaster'
-  #     - '/opt/keymaster/vault'
-  #     - '/opt/keymaster/gpgkeys'
-  #   tags:
-  #     - pass-workspace
-  # 
-  # - name: Generate a config file for the server
-  #   template:
-  #     src: config.j2
-  #     dest: /opt/keymaster/config.ini
-  #     owner: "{{ deploy_user }}"
-  #     mode: '0644'
-  #   tags:
-  #     - pass-workspace
-  # 
-  # - name: push keys generation
-  #   copy:
-  #     src: initgpg.sh
-  #     dest: /opt/keymaster/initgpg.sh
-  #     owner: "{{ deploy_user }}"
-  #     group: "{{ deploy_user }}"
+
