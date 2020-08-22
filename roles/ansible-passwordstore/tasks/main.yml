@@ -30,6 +30,14 @@
   become_user: "{{ deploy_user }}"
   raw: "gpg --list-secret-keys deployer@pulsingminds.com"
   register: gpgkeypresent
+  ignore_errors: True
+  tags:
+  - import-key
+
+- name: force importkey
+  when: forcedeploy is defined
+  set_fact:
+    gpgkeypresent: failed
   tags:
   - import-key
 
@@ -58,7 +66,6 @@
 
 - name: Makes gnupg folder readable
   when: gpgkeypresent is failed
-  # when: ( gpgpriv is defined )
   file:
     path: "{{ deploy_home.stdout }}/.gnupg"
     owner: "{{ deploy_user }}"
@@ -93,7 +100,6 @@
 
 - name: Protects gnupg from everyone
   when: gpgkeypresent is failed
-  # when: ( gpgpriv is defined )
   file:
     path: "{{ deploy_home.stdout }}/.gnupg"
     owner: "{{ deploy_user }}"
