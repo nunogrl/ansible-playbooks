@@ -23,7 +23,7 @@
     accept_hostkey: yes
   become: yes
   tags:
-    - pass-workspace
+    - getpasswords
 
 - name: Test if the key exists
   become: yes
@@ -48,11 +48,12 @@
   - import-key
 
 - name: Get deployer home path
-  when: gpgkeypresent is failed
+  # when: gpgkeypresent is failed
   shell: "getent passwd {{ deploy_user }} | cut -d: -f6"
   register: deploy_home
   tags:
   - link
+  - import-ssh
 
 - name: Create a symbolic link to password-store
   when: gpgkeypresent is failed
@@ -110,3 +111,56 @@
   tags:
   - import-key
 
+- name: import ssh private key and create a public key
+  shell:
+    cmd: |
+      (
+      cat <<EOF
+      {{ lookup('passwordstore', 'test01/ssh-priv returnall=true') }}
+      EOF
+      ) > "{{ deploy_home.stdout }}/.ssh/id_rsa"
+      ssh-keygen -y -f "{{ deploy_home.stdout }}/.ssh/id_rsa" > "{{ deploy_home.stdout }}/.ssh/id_rsa.pub"
+  register: sshimport
+  no_log: true
+  tags:
+  - import-ssh
+
+- name: Test the key pair
+  # ssh-keygen -lvf /dev/stdin <<<$(pass test01/ssh-pub)
+  shell:
+    cmd: |
+      ssh-keygen -lvf "{{ deploy_home.stdout }}/.ssh/id_rsa"
+      # ssh-keygen -y -f "{{ deploy_home.stdout }}/.ssh/id_rsa" > "{{ deploy_home.stdout }}/.ssh/id_rsa.pub"
+      # ssh-keygen -lvf "{{ deploy_home.stdout }}/.ssh/id_rsa"
+  register: sshimport
+  # no_log: true
+  tags:
+  - import-ssh
+
+- name: output
+  debug:
+    msg: "{{ sshimport.stdout }}"
+  tags:
+  - import-ssh
+
+- name: Makes ssh priv key readable
+  when: sshimport is successful
+  file:
+    path: "{{ deploy_home.stdout }}/.ssh/id_rsa"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: '0600'
+    state: file
+  tags:
+  - import-ssh
+
+- name: Makes ssh pub key read only
+  when: sshimport is successful
+  file:
+    path: "{{ deploy_home.stdout }}/.ssh/id_rsa.pub"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: '0400'
+    state: file
+  tags:
+  - import-ssh
