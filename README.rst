@@ -1,22 +1,8 @@
 README
 ######
 
-.. code-block:: TEXT
-
-    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    ░░░░░┌───────┐░░░░░░░░░░░░░░░░░░░
-    ░░░░░│░░░░░░░│░░░░░░░░░░░░░░░░░░░
-    ░░░░░│░Test░░│░░░░░░░░░░░░░░░░░░░
-    ░░░░░│░░░░░░░│░░░░░░░░░░░░░░░░░░░
-    ░░░░░└───────┘░░░░░░░░░░░░░░░░░░░
-    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-    ░░░░░╔═══════╗░░░░░░░╔═══════╗░░░
-    ░░░░░║░░░░░░░║░░░░░░░║░░░░░░░║░░░
-    ░░░░░║░░Dev░░║══════>║░Prod░░║░░░
-    ░░░░░║░░░░░░░║░░░░░░░║░░░░░░░║░░░
-    ░░░░░╚═══════╝░░░░░░░╚═══════╝░░░
-    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
+Simplified Schematic
+====================
 
 .. code-block:: TEXT
 
@@ -36,6 +22,19 @@ README
       |   |/                     '-.( ).-'
       '---'
 
+
+Dev
+  A server with a VPN connection to perform some evaluation prior to make the
+  changes on the production server.
+
+Prod
+  Public facing server.
+
+Test
+  A server to run some playbooks and test some configurations.
+
+Dropbox / Pcloud
+  Intermediate space to store some media, such backups or assets
 
 
 .. code-block:: TEXT
