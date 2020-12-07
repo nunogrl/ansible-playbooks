@@ -62,7 +62,7 @@ Calling a playbook should be as easy as:
 
 
 Testing Locally
-===============
+---------------
 
 There's a Vagrant file that can be used to test an incoming playbook
 
@@ -75,8 +75,9 @@ bootstrap
 
 The first connection to the server.
 
-Connects as root with a given password and performs the hardening.
-
+- Connects as root with a given password
+- Performs the hardening.
+- Configures MTA
 
 security-firewall.yaml
 ----------------------
@@ -84,7 +85,6 @@ security-firewall.yaml
 - Configure users
 - Setup dropbox connection
 - Updates Firewall
-
 
 Playbooks
 =========
@@ -100,6 +100,4 @@ moodledb.yaml
 moodle.yaml
 nci-ansible-ui.yml
 password-store.yaml
-roles
 shaarli.yaml
-vars
