@@ -11,3 +11,12 @@ all:
     dev:
       hosts:
         palladio:
+    prod:
+      hosts:
+        oxygene:
+    home:
+      hosts:
+        rpi3:
+          ansible_host: 192.168.0.3
+
+
