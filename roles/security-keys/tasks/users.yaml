@@ -1,23 +1,23 @@
-    - name: get core users names
-      set_fact:
-        superusers: "{{ lookup('filetree', 'users/') | json_query(listquery) }}"
-      vars:
-        listquery: "[*].path"
-      tags:
-        - coreusers
-
-    - debug:
-        var: superusers
-      tags:
-        - coreusers
+#    - name: get core users names
+#      set_fact:
+#        superusers: "{{ lookup('filetree', 'users/') | json_query(listquery) }}"
+#      vars:
+#        listquery: "[*].path"
+#      tags:
+#        - coreusers
+#
+#    - debug:
+#        var: superusers
+#      tags:
+#        - coreusers
 
     - name: Add other users
       user:
         name: "{{ item }}"
-        password: "{{ UBUNTU_COMMON_DEPLOY_PASSWORD | password_hash('sha512') }}"
+        #  password: "{{ UBUNTU_COMMON_DEPLOY_PASSWORD | password_hash('sha512') }}"
         shell: /bin/bash
-      with_items: "{{ superusers }}"
-      when: superusers is defined
+      with_items: "{{ serverusers }}"
+      when: serverusers is defined
       tags:
          - coreusers
 
@@ -25,8 +25,20 @@
       authorized_key:
         user: "{{ item }}"
         key: "{{ lookup('file', 'users/{{ item }}') }}"
-      with_items: "{{ superusers }}"
-      when: superusers is defined
+      with_items: "{{ serverusers }}"
+      when: serverusers is defined
+      tags:
+         - coreusers
+
+    - name: Restore skel on all users
+      copy:
+        src: files/bashrc.script
+        dest: "/home/{{ item }}/.bashrc"
+        owner: "{{ item }}"
+        group: "{{ item }}"
+        mode: '644'
+      with_items: "{{ serverusers }}"
+      when: serverusers is defined
       tags:
          - coreusers
 
@@ -37,10 +49,11 @@
         owner: root
         group: root
         mode: 0400
-      with_items: "{{ superusers }}"
+        # with_items: "{{ serverusers }}"
+      with_items: "{{ ubuntu_common_deploy_user_name | union(serverusers) }}"
       tags:
          - coreusers
-      when: superusers is defined
+      when: serverusers is defined
 
     - name: Find existing users
       shell: |
@@ -62,18 +75,18 @@
 
     - name: Users to keep
       debug:
-        var: ubuntu_common_deploy_user_name | union(superusers)
+        var: ubuntu_common_deploy_user_name | union(serverusers)
       tags:
         - coreusers
-      when: superusers is defined
+      when: serverusers is defined
 
     - name: identify users to delete
       set_fact:
-        removeusers: "{{ existingusers.stdout_lines | difference(ubuntu_common_deploy_user_name | union(superusers)) }}"
+        removeusers: "{{ existingusers.stdout_lines | difference(ubuntu_common_deploy_user_name | union(serverusers)) }}"
       no_log: True
       tags:
          - coreusers
-      when: superusers is defined
+      when: serverusers is defined
 
     - name: delete all users
       set_fact:
@@ -81,7 +94,7 @@
       no_log: True
       tags:
          - coreusers
-      when: superusers is not defined
+      when: serverusers is not defined
 
     - name: Users to remove
       debug:

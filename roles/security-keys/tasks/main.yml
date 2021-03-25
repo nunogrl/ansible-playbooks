@@ -1,18 +1,17 @@
 ---
 # tasks file for security-keys
 
-#    - name: Change root password
-#      user: name=root password={{ UBUNTU_COMMON_ROOT_PASSWORD | password_hash('sha512') }}
-#      # no_log: True
-#      tags:
-#         - rootaccess
+    - name: Connecting to the server
+      include_tasks: first-connection.yaml
+      tags:
+        - first
 
     - name: Change SSH attributes
       include_tasks: ssh-setup.yaml
       tags:
         - ssh-setup
 
-    - name: Change host attributes
+    - name: Change hostname attributes
       include_tasks: setup-host.yaml
       tags:
         - hostname
@@ -26,8 +25,6 @@
         mode: '644'
       tags:
          - login
-
-
 
     - name: Setup default users
       include_tasks: init-users.yaml

@@ -2,7 +2,7 @@
       lineinfile:
         dest: /etc/ssh/sshd_config
         regexp: '^Port\s'
-        line: "Port {{ ubuntu_common_ssh_port }}"
+        line: "Port {{ SSH_PORT }}"
         state: present
       notify: Restart ssh
       tags:
@@ -17,7 +17,6 @@
       notify: Restart ssh
       tags:
          - sshserver
-
 
     - name: Allow root SSH access
       lineinfile:

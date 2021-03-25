@@ -1,12 +1,12 @@
 ---
 # tasks file for security-keys
-  - name: initusers - Change root password
-    user:
-      name: root
-      password: "{{ UBUNTU_COMMON_ROOT_PASSWORD | password_hash('sha512') }}"
-    # no_log: True
-    tags:
-       - rootaccess
+#  - name: initusers - Change root password
+#    user:
+#      name: root
+#      password: "{{ UBUNTU_COMMON_ROOT_PASSWORD | password_hash('sha512') }}"
+#    # no_log: True
+#    tags:
+#       - rootaccess
 
   - name: Add deploy user
     user:
