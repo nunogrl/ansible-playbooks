@@ -1,6 +1,14 @@
 README
 ######
 
+Pre-flight
+==========
+
+.. code-block:: TEXT
+
+    git submodule update --init --recursive
+
+
 Simplified Schematic
 ====================
 

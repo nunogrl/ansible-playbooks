@@ -4,3 +4,6 @@
 [submodule "roles/ansible-role-nodejs"]
 	path = roles/ansible-role-nodejs
 	url = git@github.com:geerlingguy/ansible-role-nodejs.git
+[submodule "roles/ansible-security-keys"]
+	path = roles/ansible-security-keys
+	url = git@github.com:nunogrl/ansible-security-keys.git
