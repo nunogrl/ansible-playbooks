@@ -5,6 +5,9 @@ hostname: test01
 bookmarksaddress: bookmarks-dev.pulsingminds.com
 ansible_ssh_host: 54.38.186.254
 php_version: '7.1'
+## Monitoring
+datadog_integrations:
+- docker
 ## Firewall
 firewall_v4_group_rules:
   400 allow http:

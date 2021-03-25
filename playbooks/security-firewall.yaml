@@ -1,11 +1,15 @@
 ---
-- hosts: dev
-  # user: nuno
+- hosts:
+    - rpi3
+    - jessievbox
+  gather_facts: no
+  user: nuno
   become: yes
   roles:
-      #     - security-keys
-      #  - BCdropbox
-    - ansible-role-firewall
+    - security-keys
+    
+      # - BCdropbox
+      # - ansible-role-firewall
 
       #- hosts: dns
       #  # user: nuno
