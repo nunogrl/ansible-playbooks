@@ -1,0 +1,26 @@
+---
+- name: install duckdns
+  hosts: rpi4
+  vars:
+    # defaults file for duckdns
+    duckdns_project_root: /etc/duckdns
+    duckdns_project_log: /var/log/duckdns
+
+    # DuckDNS local machine settings
+    duckdns_user: duckdns
+    duckdns_group: duckdns
+
+    # DuckDNS remote settings
+    duckdns_subdomain: "{{ lookup('passwordstore', 'personal/duckdns/london01/subdomain') }}"
+    duckdns_token: "{{ lookup('passwordstore', 'personal/duckdns/london01/token') }}"
+
+    # DuckDNS immediate update
+    duckdns_update_now: no
+
+  become: yes
+  roles:
+    - { role: rofrantz.duckdns }
+      # - ansible-role-duckdns
+
+
+
